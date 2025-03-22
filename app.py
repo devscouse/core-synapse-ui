@@ -4,7 +4,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
 
-from src.cache import Cache
 from src.log import logging_config
 from src.config import cfg
 from src.svc import ServiceApi
