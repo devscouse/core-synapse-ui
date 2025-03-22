@@ -16,17 +16,12 @@ done
 
 SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
 
-echo "Building API Docker image..."
-
-if $LOAD_MINIKUBE; then
-    echo "Activating Minikube Docker environment..."
-    eval $(minikube docker-env)
-fi
-
 echo "Building UI docker image..."
-ui_version=$(cat ui/VERSION)
-tag_name=core-synapse-ui-$ui_version
-docker build -t $tag_name -f ui/Dockerfile .
+tag_name=core-synapse-ui-$SHORT_SHA
+docker build -t $tag_name -f Dockerfile .
+echo "$tag_name built..."
+
+echo "Pushing $tag_name..."
 docker tag $tag_name $DOCKER_REPO:$tag_name
 docker push $DOCKER_REPO:$tag_name
 echo "$tag_name pushed to $DOCKER_REPO"
