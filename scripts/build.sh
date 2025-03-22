@@ -14,7 +14,7 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-DOCKER_REPO="devscouse/privatelibrary"
+SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
 
 echo "Building API Docker image..."
 
