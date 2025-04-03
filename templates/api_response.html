@@ -1,0 +1,11 @@
+<div 
+    id="api-response-div" 
+    class="{{ 'success' if response.status_code == 200 else 'failure' }}"
+>
+    <h3>{{ 'SUCCESS' if response.status_code == 200 else 'FAILURE' }}</h3>
+    <p>Time taken: {{ response.time_taken }}</p>
+
+    <code id="api-response-content" style="white-space: pre-wrap;">
+        {{ response.text }}
+    </code>
+</div>
