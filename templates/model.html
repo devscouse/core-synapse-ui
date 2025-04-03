@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core Synapse UI</title>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+    <link rel="stylesheet" href="/static/styles.css">
+<style>
+        /* Collapsible Button */
+        .collapsible {
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            padding: 10px;
+            width: 100%;
+            text-align: left;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            transition: background-color 0.3s;
+        }
+
+        .collapsible:hover {
+            background-color: #2980b9;
+        }
+
+        /* Collapsible content (hidden by default) */
+        .content {
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #3498db;
+            display: none;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+
+        /* Show the collapsible content when active */
+        .active + .content {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="overlay">
+        <div id="loading-spinner" class="spinner"></div>
+    </div>
+    <h1>{{ model.name }}</h1>
+    <p>{{ model.description }}</p>
+    {% for endpoint in model.endpoints %}
+    <hr>
+    <div>
+        <button class="collapsible">{{ endpoint.label }}</button>
+        <div class="content">
+        <h2>{{ endpoint.label }}</h2>
+        <p>{{ endpoint.description }}</p>
+        {% if endpoint.request_schema %}
+        <h3>Input</h3>
+        {% endif %}
+        <div>
+            <form 
+            {{ 'hx-get' if endpoint.http_method.lower() == "get" else 'hx-post' }}="/svcproxy{{ endpoint.endpoint }}"
+            hx-swap="innerHTML"
+            hx-target="next #response-div"
+            hx-headers='{"model-key": "{{ model.id }}"}'
+            hx-on="htmx:configRequest: showLoading"
+            {% if endpoint.http_method.lower() == "post" %}hx-ext="json-enc"{% endif %}
+            >
+                {% for field in endpoint.request_schema %}
+                    <label for="{{ field.key }}">{{ field.title }}</label>
+                    <input id="{{ field.key }}" name="{{ field.key }}" type="text"><br><br>
+                {% endfor %}
+                <button>RUN</button>
+            </form>
+        </div>
+        <div id="response-div"></div>
+    </div>
+    </div>
+    {% endfor %}
+
+    <script>
+        // JavaScript to toggle the collapsible content
+        document.querySelectorAll('.collapsible').forEach(button => {
+            button.addEventListener('click', function() {
+                // Toggle the active class to open/close content
+                this.classList.toggle('active');
+            });
+        });
+        
+        // Show the loading spinner when the request is triggered
+        document.body.addEventListener('htmx:configRequest', function(event){
+            document.getElementById('overlay').style.display = 'flex';
+        });
+
+        // Hide the loading spinner when the request is finished
+        document.body.addEventListener('htmx:afterSwap', function(event){
+            document.getElementById('overlay').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
